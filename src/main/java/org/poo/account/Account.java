@@ -236,7 +236,7 @@ public class Account {
             }
 
         }
-
+        System.out.println(to + getUser().getPlanType().toString());
         return ERROR_UPGRADE_PLAN.DOWNGRADE;
 
     }
@@ -251,5 +251,23 @@ public class Account {
         getUser().getTransactions().add(transaction);
     }
 
+    public boolean canDeleteCard(User user, Card card) {
+        return true;
+    }
+
+    public boolean canPay(User user, double amount) {
+        if (!user.getEmail().toString().equals(getUser().getEmail().toString())) {
+            return false;
+        }
+        return true;
+    }
+
+    public boolean canDeposit(User user, double amount) {
+        return true;
+    }
+
+    public void addSpendingTransaction(User user, double amount, Commerciant comm, int timestamp) {
+        return;
+    }
 
 }

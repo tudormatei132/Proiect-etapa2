@@ -31,6 +31,7 @@ public class PrintUsers implements Command {
         ObjectNode output = mapper.createObjectNode();
         output.put("command", "printUsers");
         output.put("timestamp", timestamp);
+
         ArrayNode usersArray = mapper.createArrayNode();
         for (User user : users) {
             usersArray.add(user.printUser(mapper));

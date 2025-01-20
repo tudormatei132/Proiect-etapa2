@@ -29,6 +29,7 @@ public class AutoUpgrader {
         if (count + 1 == 5) {
             account.getUser().setPlanType(Utils.PLAN_TYPE.GOLD);
             silverAccounts.remove(account);
+            System.out.println("DAAAAAAAAAAAA");
         }
 
     }

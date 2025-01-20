@@ -3,6 +3,7 @@ package org.poo.command;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.account.Card;
+import org.poo.account.User;
 import org.poo.commerciant.Commerciant;
 import org.poo.errors.Log;
 import org.poo.system.Converter;
@@ -29,12 +30,12 @@ public class PayOnline implements Command {
     private HashMap<String, Card> cardMap;
     private Converter converter;
     private Commerciant commerciant;
-
+    private User user;
 
     public PayOnline(final Card card, final double amount, final String currency,
                      final String email, final ArrayNode output, final ObjectMapper mapper,
                      final int timestamp, final HashMap<String, Card> cardMap,
-                     final Converter converter, final Commerciant commerciant) {
+                     final Converter converter, final Commerciant commerciant, final User user) {
         this.card = card;
         this.amount = amount;
         this.currency = currency;
@@ -45,6 +46,7 @@ public class PayOnline implements Command {
         this.cardMap = cardMap;
         this.converter = converter;
         this.commerciant = commerciant;
+        this.user = user;
     }
 
     /**
@@ -63,15 +65,16 @@ public class PayOnline implements Command {
             return;
         }
 
+
+        if (!card.getAccount().canPay(user, amount)) {
+            System.out.println("NU se poate!");
+            return;
+        }
+
         if (amount == 0)
             return;
 
-        String correspondingEmail = card.getAccount().getUser().getEmail().toString();
 
-
-        if (!correspondingEmail.equals(email)) {
-            return;
-        }
 
 
         double amountInRon = Converter.getInstance().convert(currency, "RON") * amount;
@@ -134,6 +137,11 @@ public class PayOnline implements Command {
         commerciant.setCashBack(card.getAccount());
         card.getAccount().addFunds(cashbackAmount * card.getAccount().getCashBack(commerciant));
 
+
+        if (card.getAccount().getType().toString().equals("business")) {
+            System.out.println("-----DA-------");
+        }
+        card.getAccount().addSpendingTransaction(user, -cashbackAmount, commerciant, timestamp);
 
         if (amountInRon >= 300 && card.getAccount().getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
             AutoUpgrader.getInstance().updateStatus(card.getAccount());

@@ -55,7 +55,8 @@ public class CommandHandler {
 
             case "addFunds":
                 return new AddFunds(system.getAccountMap().get(command.getAccount()),
-                        command.getAmount(), command.getTimestamp());
+                        command.getAmount(), command.getTimestamp(),
+                        system.getUserMap().get(command.getEmail()));
 
             case "createOneTimeCard":
                 return new CreateOneTimeCard(system.getAccountMap().get(command.getAccount()),
@@ -63,7 +64,8 @@ public class CommandHandler {
 
             case "deleteCard":
                 return new RemoveCard(command.getCardNumber(), system.getCardMap(),
-                                      command.getTimestamp());
+                                      command.getTimestamp(),
+                                      system.getUserMap().get(command.getEmail()));
 
 
             case "payOnline":
@@ -74,14 +76,15 @@ public class CommandHandler {
                 return new PayOnline(system.getCardMap().get(command.getCardNumber()),
                         command.getAmount(), command.getCurrency(), command.getEmail(),
                         output, mapper, command.getTimestamp(), system.getCardMap(),
-                        system.getConverter(), commerciant);
+                        system.getConverter(), commerciant, system.getUserMap().get(command.getEmail()));
 
 
             case "sendMoney":
                 return new SendMoney(command.getDescription(),
                         system.getUserMap().get(command.getEmail()), command.getAmount(),
                         system.getConverter(), command.getAccount(), command.getReceiver(),
-                        command.getTimestamp(), system.getAccountMap(), output, mapper);
+                        command.getTimestamp(), system.getAccountMap(), output, mapper,
+                        system.getCommerciantMap());
 
 
             case "printTransactions":
@@ -150,7 +153,19 @@ public class CommandHandler {
             case "acceptSplitPayment":
                 return new AcceptSplit(system.getUserMap().get(command.getEmail()),
                         command.getTimestamp(), command.getSplitPaymentType());
-
+            case "addNewBusinessAssociate":
+                return new NewAssociate(system.getAccountMap().get(command.getAccount()),
+                        command.getRole(), system.getUserMap().get(command.getEmail()),
+                        command.getTimestamp());
+            case "changeSpendingLimit":
+                return new SetLimit(command.getAmount(), system.getAccountMap().get(command.getAccount()),
+                        system.getUserMap().get(command.getEmail()), true, output, mapper, command.getTimestamp());
+            case "changeDepositLimit":
+                return new SetLimit(command.getAmount(), system.getAccountMap().get(command.getAccount()),
+                        system.getUserMap().get(command.getEmail()), false, output, mapper, command.getTimestamp());
+            case "businessReport":
+                return new BusinessReport(system.getAccountMap().get(command.getAccount()), output, mapper,
+                        command.getTimestamp(), command.getType(), command.getStartTimestamp(), command.getEndTimestamp());
             default:
                 return null;
 

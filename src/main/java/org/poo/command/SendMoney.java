@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.account.Account;
 import org.poo.account.User;
+import org.poo.commerciant.Commerciant;
 import org.poo.errors.Log;
 import org.poo.system.Converter;
 import org.poo.transactions.Transaction;
@@ -24,11 +25,14 @@ public class SendMoney implements Command {
     private HashMap<String, Account> accountMap;
     private ArrayNode output;
     private ObjectMapper mapper;
+    private HashMap<String, Commerciant> commerciantMap;
 
     public SendMoney(final String description, final User user, final double amount,
                      final Converter converter, final String sender, final String receiver,
                      final int timestamp, final HashMap<String, Account> accountMap,
-                     final ArrayNode output, final ObjectMapper mapper) {
+                     final ArrayNode output, final ObjectMapper mapper,
+                     final HashMap<String, Commerciant> commerciantMap) {
+
         this.description = description;
         this.user = user;
         this.amount = amount;
@@ -39,6 +43,7 @@ public class SendMoney implements Command {
         this.accountMap = accountMap;
         this.output = output;
         this.mapper = mapper;
+        this.commerciantMap = commerciantMap;
     }
 
     /**
@@ -48,6 +53,8 @@ public class SendMoney implements Command {
      * it also converts the amount that will get into the receiver's account
      */
     public void execute() {
+
+        Commerciant comm = null;
 
         Account senderAccount = accountMap.get(sender);
         if (senderAccount == null) {
@@ -62,14 +69,17 @@ public class SendMoney implements Command {
         if (receiverAccount == null) {
             receiverAccount = accountMap.get(receiver);
             if (receiverAccount == null) {
-                Log error = new Log.Builder("sendMoney", timestamp).setDetailsTimestamp(timestamp)
-                        .setDescription("User not found").build();
-                output.add(error.print(mapper));
-                return;
+                comm = commerciantMap.get(receiver);
+                if (comm == null) {
+                    Log error = new Log.Builder("sendMoney", timestamp).setDetailsTimestamp(timestamp)
+                            .setDescription("User not found").build();
+                    output.add(error.print(mapper));
+                    return;
+                }
             }
         }
 
-        if (!senderAccount.getUser().getEmail().toString().equals(user.getEmail().toString())) {
+        if (!senderAccount.canPay(user, amount)) {
             return;
         }
 
@@ -83,34 +93,44 @@ public class SendMoney implements Command {
 
         senderAccount.addFunds(- amount * (1 + Utils.getCommission(senderAccount.getUser(), amount, senderAccount.getCurrency().toString())));
 
-        double converted = amount * converter.convert(senderAccount.getCurrency().toString(),
-                receiverAccount.getCurrency().toString());
 
-        receiverAccount.addFunds(converted);
+
+        if (receiverAccount != null) {
+            receiver = receiverAccount.getIban().toString();
+        }
 
         Transfer transfer = new Transfer(timestamp, description,
                 Double.toString(amount) + " " + senderAccount.getCurrency(), "sent",
-                senderAccount.getIban().toString(), receiverAccount.getIban().toString());
+                senderAccount.getIban().toString(), receiver);
 
         senderAccount.getTransactions().add(transfer);
         senderAccount.getUser().getTransactions().add(transfer);
 
-        Transfer receivedMoney = new Transfer(timestamp, description,
-                                      Double.toString(converted) + " "
-                                              + receiverAccount.getCurrency(), "received",
-                                              senderAccount.getIban().toString(),
-                                              receiverAccount.getIban().toString());
+        if (receiverAccount != null) {
+            double converted = amount * converter.convert(senderAccount.getCurrency().toString(),
+                    receiverAccount.getCurrency().toString());
+            Transfer receivedMoney = new Transfer(timestamp, description,
+                    Double.toString(converted) + " "
+                            + receiverAccount.getCurrency(), "received",
+                    senderAccount.getIban().toString(),
+                    receiverAccount.getIban().toString());
 
-        receiverAccount.getTransactions().add(receivedMoney);
-        receiverAccount.getUser().getTransactions().add(receivedMoney);
-
-
+            receiverAccount.addFunds(converted);
+            receiverAccount.getTransactions().add(receivedMoney);
+            receiverAccount.getUser().getTransactions().add(receivedMoney);
+        }
         double amountInRon = amount * Converter.getInstance().
-                                    convert(senderAccount.getCurrency().toString(), "RON");
+                convert(senderAccount.getCurrency().toString(), "RON");
+
+        senderAccount.addSpendingTransaction(user, -amount, comm, timestamp);
+        if (comm != null) {
+            comm.setCashBack(senderAccount);
+            senderAccount.addFunds(amount * senderAccount.getCashBack(comm));
+        }
+
         if (amountInRon >= 300 && senderAccount.getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
             AutoUpgrader.getInstance().updateStatus(senderAccount);
         }
-
 
     }
 }

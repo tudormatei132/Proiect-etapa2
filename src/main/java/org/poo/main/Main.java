@@ -50,14 +50,17 @@ public final class Main {
         var sortedFiles = Arrays.stream(Objects.requireNonNull(directory.listFiles())).
                 sorted(Comparator.comparingInt(Main::fileConsumer))
                 .toList();
+        int i = 0;
         for (File file : sortedFiles) {
             String filepath = CheckerConstants.OUT_PATH + file.getName();
             File out = new File(filepath);
             boolean isCreated = out.createNewFile();
+            System.out.println("-----------" + (i + 1) + "---------------");
             if (isCreated) {
                 action(file.getName(), filepath);
             }
 
+            i++;
         }
 
         Checker.calculateScore();

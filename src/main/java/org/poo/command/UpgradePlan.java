@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.account.Account;
 import org.poo.errors.Log;
+import org.poo.transactions.Transaction;
 import org.poo.transactions.UpgradedPlan;
 import org.poo.utils.Utils;
 
@@ -30,8 +31,8 @@ public class UpgradePlan implements Command {
     public void execute() {
 
         if (account == null) {
-            Log error = new Log.Builder("upgradePlan", timestamp).setError("Account not found")
-                    .build();
+            Log error = new Log.Builder("upgradePlan", timestamp).setDescription("Account not found")
+                    .setDetailsTimestamp(timestamp).build();
             output.add(error.print(mapper));
             return;
         }
@@ -43,7 +44,13 @@ public class UpgradePlan implements Command {
                                                         "Upgrade plan", newPlan);
             account.getTransactions().add(transaction);
             account.getUser().getTransactions().add(transaction);
+        } else if (ret == Utils.ERROR_UPGRADE_PLAN.INSUFFICIENT) {
+            Transaction error = new Transaction(timestamp, "Insufficient funds");
+            account.getTransactions().add(error);
+            account.getUser().getTransactions().add(error);
+        } else if (ret == Utils.ERROR_UPGRADE_PLAN.DOWNGRADE) {
+            System.out.println("UNUL MAI BUN DEJA");
         }
-        System.out.println(ret);
+
     }
 }

@@ -1,9 +1,6 @@
 package org.poo.command;
 
-import org.poo.account.Account;
-import org.poo.account.ClassicAccount;
-import org.poo.account.SavingsAccount;
-import org.poo.account.User;
+import org.poo.account.*;
 import org.poo.fileio.CommandInput;
 import org.poo.transactions.AccountCreation;
 import org.poo.utils.Utils;
@@ -36,11 +33,14 @@ public class AddAccount implements  Command {
             account = new ClassicAccount(temp,
                     new StringBuilder(Utils.generateIBAN()),
                     new StringBuilder(command.getCurrency()));
-        } else {
+        } else if (command.getAccountType().equals("savings")) {
             account = new SavingsAccount(temp,
                     new StringBuilder(Utils.generateIBAN()),
                     new StringBuilder(command.getCurrency()),
                     command.getInterestRate());
+        } else {
+            account = new BusinessAccount(temp, new StringBuilder(Utils.generateIBAN()),
+                    new StringBuilder(command.getCurrency()));
         }
 
 
