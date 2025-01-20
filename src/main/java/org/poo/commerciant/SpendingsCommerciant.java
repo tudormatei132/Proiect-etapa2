@@ -20,6 +20,7 @@ public class SpendingsCommerciant extends Commerciant {
             }
             if (account.getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
                account.setPermanentDiscount(0.3 / 100);
+               return;
             }
 
             account.setPermanentDiscount(0.5 / 100);
@@ -34,6 +35,7 @@ public class SpendingsCommerciant extends Commerciant {
             }
             if (account.getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
                 account.setPermanentDiscount(0.4 / 100);
+                return;
             }
 
             account.setPermanentDiscount(0.55 / 100);
@@ -47,6 +49,7 @@ public class SpendingsCommerciant extends Commerciant {
             }
             if (account.getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
                 account.setPermanentDiscount(0.5 / 100);
+                return;
             }
 
             account.setPermanentDiscount(0.7 / 100);

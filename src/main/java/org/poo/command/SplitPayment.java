@@ -49,6 +49,8 @@ public class SplitPayment implements Command {
             }
         }
 
+
+
         SplitCustom payment = new SplitCustom(accountArray, type, currency, amount,
                                              timestamp, (ArrayList<Double>) amounts);
 

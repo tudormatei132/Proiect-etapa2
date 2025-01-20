@@ -176,7 +176,7 @@ public class Account {
     }
 
     public double getCashBack(Commerciant comm) {
-        if (comm.getType().equals("nrOfTransactions")) {
+        if (comm.getCashbackStrategy().equals("nrOfTransactions")) {
             if (comm.getType().equals("Food") && oneTimeDiscounts[0]) {
                 oneTimeDiscounts[0] = false;
                 return 2f / 100;
