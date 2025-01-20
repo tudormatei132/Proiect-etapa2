@@ -62,7 +62,8 @@ public class PayOnline implements Command {
             return;
         }
 
-
+        if (amount == 0)
+            return;
 
         String correspondingEmail = card.getAccount().getUser().getEmail().toString();
 
@@ -73,7 +74,9 @@ public class PayOnline implements Command {
 
 
         double amountInRon = Converter.getInstance().convert(currency, "RON") * amount;
-        amount = amount * (converter.convert(currency, card.getAccount().getCurrency().toString()));
+        double cashbackAmount = amount * converter.convert(currency, card.getAccount().getCurrency().toString());
+        amount = amount * (1 + Utils.getCommission(card.getAccount().getUser(), amount, currency))
+                * (converter.convert(currency, card.getAccount().getCurrency().toString()));
 
 
 
@@ -93,9 +96,8 @@ public class PayOnline implements Command {
             return;
         }
 
-        card.getAccount().addNewSpending(commerciant, amountInRon);
 
-        Payment newPayment = new Payment(timestamp, "Card payment", amount, commerciant.getName());
+        Payment newPayment = new Payment(timestamp, "Card payment", cashbackAmount, commerciant.getName());
 
         card.getAccount().getTransactions().add(newPayment);
         card.getAccount().getPayments().add(newPayment);
@@ -127,8 +129,9 @@ public class PayOnline implements Command {
             cardMap.put(card.getCardNumber().toString(), card);
         }
 
+        card.getAccount().addNewSpending(commerciant, amountInRon);
         commerciant.setCashBack(card.getAccount());
-        card.getAccount().addFunds(amount * card.getAccount().getCashBack(commerciant));
+        card.getAccount().addFunds(cashbackAmount * card.getAccount().getCashBack(commerciant));
 
     }
 

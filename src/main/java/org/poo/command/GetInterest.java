@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.account.Account;
 import org.poo.account.SavingsAccount;
 import org.poo.errors.Log;
+import org.poo.transactions.InterestIncome;
 
 public class GetInterest implements Command {
 
@@ -40,7 +41,13 @@ public class GetInterest implements Command {
             return;
         }
 
+
         SavingsAccount account = (SavingsAccount) savingsAccount;
+        InterestIncome transaction = new InterestIncome(timestamp, "Interest rate income",
+                savingsAccount.getCurrency().toString(), account.getInterestRate() * account.getBalance());
         account.addFunds(account.getInterestRate() * account.getBalance());
+
+        account.getTransactions().add(transaction);
+        account.getUser().getTransactions().add(transaction);
     }
 }

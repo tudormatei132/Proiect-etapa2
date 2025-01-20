@@ -81,7 +81,7 @@ public class CommandHandler {
                 return new SendMoney(command.getDescription(),
                         system.getUserMap().get(command.getEmail()), command.getAmount(),
                         system.getConverter(), command.getAccount(), command.getReceiver(),
-                        command.getTimestamp(), system.getAccountMap());
+                        command.getTimestamp(), system.getAccountMap(), output, mapper);
 
 
             case "printTransactions":
@@ -137,6 +137,15 @@ public class CommandHandler {
                 return new WithdrawSavings(system.getAccountMap().get(command.getAccount()),
                         command.getAmount(),
                         command.getCurrency(), command.getTimestamp(), mapper, output);
+
+            case "upgradePlan":
+                return new UpgradePlan(mapper, output,
+                        system.getAccountMap().get(command.getAccount()), command.getNewPlanType(),
+                        command.getTimestamp());
+            case "cashWithdrawal":
+                return new CashWithdrawal(system.getCardMap().get(command.getCardNumber()),
+                        command, system.getUserMap().get(command.getEmail()), mapper, output);
+
             default:
                 return null;
 

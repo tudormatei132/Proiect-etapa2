@@ -42,7 +42,12 @@ public class User {
         aliases = new HashMap<>();
         birthDate = input.getBirthDate();
         occupation = input.getOccupation();
-        planType = PLAN_TYPE.STANDARD;
+        if (occupation.equals("student")) {
+            planType = PLAN_TYPE.STUDENT;
+        } else {
+            planType = PLAN_TYPE.STANDARD;
+        }
+
     }
 
     /**
@@ -97,7 +102,8 @@ public class User {
      */
     public Account withdrawFromSavings(String currency) {
         for (Account account : accounts) {
-            if (account.getCurrency().toString().equals(currency)) {
+            if (account.getCurrency().toString().equals(currency)
+                    && account.getType().toString().equals("classic")) {
                 return account;
             }
         }

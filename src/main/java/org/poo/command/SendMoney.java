@@ -1,10 +1,14 @@
 package org.poo.command;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.account.Account;
 import org.poo.account.User;
+import org.poo.errors.Log;
 import org.poo.system.Converter;
 import org.poo.transactions.Transaction;
 import org.poo.transactions.Transfer;
+import org.poo.utils.Utils;
 
 import java.util.HashMap;
 
@@ -17,10 +21,13 @@ public class SendMoney implements Command {
     private Converter converter;
     private String sender, receiver;
     private HashMap<String, Account> accountMap;
+    private ArrayNode output;
+    private ObjectMapper mapper;
 
     public SendMoney(final String description, final User user, final double amount,
                      final Converter converter, final String sender, final String receiver,
-                     final int timestamp, final HashMap<String, Account> accountMap) {
+                     final int timestamp, final HashMap<String, Account> accountMap,
+                     final ArrayNode output, final ObjectMapper mapper) {
         this.description = description;
         this.user = user;
         this.amount = amount;
@@ -29,6 +36,8 @@ public class SendMoney implements Command {
         this.receiver = receiver;
         this.timestamp = timestamp;
         this.accountMap = accountMap;
+        this.output = output;
+        this.mapper = mapper;
     }
 
     /**
@@ -41,6 +50,9 @@ public class SendMoney implements Command {
 
         Account senderAccount = accountMap.get(sender);
         if (senderAccount == null) {
+            Log error = new Log.Builder("sendMoney", timestamp).setDetailsTimestamp(timestamp)
+                    .setDescription("User not found").build();
+            output.add(error.print(mapper));
             return;
         }
 
@@ -49,6 +61,9 @@ public class SendMoney implements Command {
         if (receiverAccount == null) {
             receiverAccount = accountMap.get(receiver);
             if (receiverAccount == null) {
+                Log error = new Log.Builder("sendMoney", timestamp).setDetailsTimestamp(timestamp)
+                        .setDescription("User not found").build();
+                output.add(error.print(mapper));
                 return;
             }
         }
@@ -57,17 +72,19 @@ public class SendMoney implements Command {
             return;
         }
 
-        if (senderAccount.getBalance() - senderAccount.getMinBalance() <= amount) {
+        if (senderAccount.getBalance() - senderAccount.getMinBalance()
+                <= amount * (1 + Utils.getCommission(senderAccount.getUser(), amount, senderAccount.getCurrency().toString()))) {
             Transaction transaction = new Transaction(timestamp, "Insufficient funds");
             senderAccount.getUser().getTransactions().add(transaction);
             senderAccount.getTransactions().add(transaction);
             return;
         }
 
-        senderAccount.addFunds(-amount);
+        senderAccount.addFunds(- amount * (1 + Utils.getCommission(senderAccount.getUser(), amount, senderAccount.getCurrency().toString())));
 
         double converted = amount * converter.convert(senderAccount.getCurrency().toString(),
                 receiverAccount.getCurrency().toString());
+
         receiverAccount.addFunds(converted);
 
         Transfer transfer = new Transfer(timestamp, description,

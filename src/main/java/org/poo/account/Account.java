@@ -6,12 +6,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import org.poo.commerciant.Commerciant;
+import org.poo.system.Converter;
 import org.poo.transactions.Payment;
 import org.poo.transactions.Transaction;
 import org.poo.utils.Utils;
 
 import java.util.HashMap;
 import java.util.ArrayList;
+
+import static org.poo.utils.Utils.ERROR_UPGRADE_PLAN;
 
 @Getter
 @Setter
@@ -186,11 +189,53 @@ public class Account {
                 oneTimeDiscounts[2] = false;
                 return 10f / 100;
             }
+            return 0f;
         }
         return permanentDiscount;
     }
 
-    public void upgradePlan(String to) {
+    public Utils.ERROR_UPGRADE_PLAN upgradePlan(String to) {
+        if (getUser().getPlanType() == Utils.PLAN_TYPE.STANDARD ||
+            getUser().getPlanType() == Utils.PLAN_TYPE.STUDENT) {
+
+            if (to.equals("silver")) {
+                if (balance >= 100 * Converter.getInstance().convert("RON", currency.toString())) {
+                    balance -= 100 * Converter.getInstance().convert("RON", currency.toString());
+                    getUser().setPlanType(Utils.PLAN_TYPE.SILVER);
+                    return ERROR_UPGRADE_PLAN.SUCCESS;
+                } else {
+                    return Utils.ERROR_UPGRADE_PLAN.INSUFFICIENT;
+                }
+
+            } else if (to.equals("gold")) {
+                if (balance >= 350 * Converter.getInstance().convert("RON", currency.toString())) {
+                    balance -= 350 * Converter.getInstance().convert("RON", currency.toString());
+                    getUser().setPlanType(Utils.PLAN_TYPE.GOLD);
+                    return ERROR_UPGRADE_PLAN.SUCCESS;
+                } else {
+                    return ERROR_UPGRADE_PLAN.INSUFFICIENT;
+                }
+            } else {
+                return ERROR_UPGRADE_PLAN.SAME_PLAN;
+            }
+
+        } else if (getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
+
+            if (to.equals("gold")) {
+                if (balance >= 250 * Converter.getInstance().convert("RON", currency.toString())) {
+                    balance -= 250 * Converter.getInstance().convert("RON", currency.toString());
+                    getUser().setPlanType(Utils.PLAN_TYPE.GOLD);
+                    return ERROR_UPGRADE_PLAN.SUCCESS;
+                } else {
+                    return ERROR_UPGRADE_PLAN.INSUFFICIENT;
+                }
+            } else if (to.equals("silver")) {
+                return ERROR_UPGRADE_PLAN.SAME_PLAN;
+            }
+
+        }
+
+        return ERROR_UPGRADE_PLAN.DOWNGRADE;
 
     }
 

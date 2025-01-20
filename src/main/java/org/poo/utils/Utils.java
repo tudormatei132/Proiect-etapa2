@@ -1,6 +1,7 @@
 package org.poo.utils;
 
 import org.poo.account.User;
+import org.poo.system.Converter;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -14,6 +15,14 @@ public final class Utils {
         STUDENT,
         SILVER,
         GOLD
+    }
+
+
+    public enum ERROR_UPGRADE_PLAN{
+        SUCCESS,
+        SAME_PLAN,
+        DOWNGRADE,
+        INSUFFICIENT
     }
 
     private Utils() {
@@ -78,16 +87,16 @@ public final class Utils {
      * @param amount the amount of money involved
      * @return value of the commission based on user's plan type and amount
      */
-    public static double getCommission(User user, double amount) {
+    public static double getCommission(User user, double amount, String currency) {
         if (user.getPlanType() == PLAN_TYPE.STANDARD) {
             return 0.2 / 100;
         }
         if (user.getPlanType() == PLAN_TYPE.STUDENT || user.getPlanType() == PLAN_TYPE.GOLD) {
-            return 0;
+            return 0f;
         }
 
-        if (amount < 500)
-            return 0;
+        if (amount * Converter.getInstance().convert(currency, "RON") < 500)
+            return 0f;
         return 0.1 / 100;
     }
 
@@ -101,7 +110,6 @@ public final class Utils {
         LocalDate birthDate = LocalDate.parse(date, formatter);
 
         Period difference = Period.between(birthDate, dateCurrent);
-        System.out.println(difference.getYears());
         return difference.getYears();
 
     }

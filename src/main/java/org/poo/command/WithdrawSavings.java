@@ -20,6 +20,7 @@ public class WithdrawSavings implements Command {
     private int timestamp;
     private ObjectMapper mapper;
     private ArrayNode output;
+
     public WithdrawSavings(final Account savingsAccount, final double amount,
                            final String currency, final int timestamp, final ObjectMapper mapper,
                            final ArrayNode output) {
@@ -53,12 +54,15 @@ public class WithdrawSavings implements Command {
         }
 
 
-        double new_amount = amount - Utils.getCommission(owner, amount);
-        new_amount = Converter.getInstance().
-                convert(savingsAccount.getCurrency().toString(), currency) * new_amount;
+        double new_amount = amount;
+        amount = Converter.getInstance().
+                convert(currency, savingsAccount.getCurrency().toString()) * new_amount;
 
         Account account = owner.withdrawFromSavings(currency);
         if (account == null) {
+            Transaction error = new Transaction(timestamp, "You do not have a classic account.");
+            owner.getTransactions().add(error);
+            savingsAccount.getTransactions().add(error);
             return;
         }
 
