@@ -152,7 +152,10 @@ public class CommandHandler {
 
             case "acceptSplitPayment":
                 return new AcceptSplit(system.getUserMap().get(command.getEmail()),
-                        command.getTimestamp(), command.getSplitPaymentType());
+                        command.getTimestamp(), command.getSplitPaymentType(), output, mapper);
+            case "rejectSplitPayment":
+                return new RejectSplit(system.getUserMap().get(command.getEmail()), command.getTimestamp(),
+                        command.getSplitPaymentType(), output, mapper);
             case "addNewBusinessAssociate":
                 return new NewAssociate(system.getAccountMap().get(command.getAccount()),
                         command.getRole(), system.getUserMap().get(command.getEmail()),

@@ -45,7 +45,11 @@ public class SplitPay extends Transaction {
         for (Double amount : amounts) {
             amountsNode.add(amount);
         }
-        result.put("amountForUsers", amountsNode);
+        if (type.equals("custom")) {
+            result.put("amountForUsers", amountsNode);
+        } else {
+            result.put("amount", amount / involvedAccounts.size());
+        }
         return result;
     }
 

@@ -1,14 +1,13 @@
 package org.poo.command;
 
 import org.poo.account.Account;
+import org.poo.account.User;
 import org.poo.system.Converter;
 import org.poo.system.SplitCustom;
 import org.poo.transactions.SplitPay;
 import org.poo.transactions.SplitPaymentError;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class SplitPayment implements Command {
 
@@ -49,14 +48,16 @@ public class SplitPayment implements Command {
             }
         }
 
-
-
-        SplitCustom payment = new SplitCustom(accountArray, type, currency, amount,
-                                             timestamp, (ArrayList<Double>) amounts);
-
+        Set<User> uniqueUsers = new HashSet<>();
         for (Account acc : accountArray) {
-            acc.getUser().getRequests().add(payment);
+            uniqueUsers.add(acc.getUser());
         }
 
+        SplitCustom payment = new SplitCustom(accountArray, type, currency, amount,
+                                             timestamp, (ArrayList<Double>) amounts, uniqueUsers.size());
+
+        for (User u : uniqueUsers) {
+            u.getRequests().add(payment);
+        }
     }
 }

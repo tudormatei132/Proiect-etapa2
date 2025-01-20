@@ -20,9 +20,9 @@ public class SplitCustom {
     private Double[] amounts;
     private int timestamp;
     private int accepted;
-
+    private int maxLength;
     public SplitCustom(ArrayList<Account> involvedAccounts, String type, String currency,
-                       double amount, int timestamp, ArrayList<Double> amounts) {
+                       double amount, int timestamp, ArrayList<Double> amounts, int maxLength) {
         this.involvedAccounts = new Account[involvedAccounts.size()];
         this.type = type;
         this.currency = currency;
@@ -38,13 +38,14 @@ public class SplitCustom {
             this.involvedAccounts[i] = involvedAccounts.get(i);
         }
         accepted = 0;
+        this.maxLength = maxLength;
     }
 
     public void accept() {
         accepted++;
         String stringAmount = String.format("%.2f", amount);
-        if (accepted == involvedAccounts.length) {
-            for (int i = 0; i < accepted; i++) {
+        if (accepted == maxLength) {
+            for (int i = 0; i < involvedAccounts.length; i++) {
                 double converted = amounts[i] * Converter.getInstance().convert(currency,
                         involvedAccounts[i].getCurrency().toString());
 
@@ -92,10 +93,13 @@ public class SplitCustom {
         for (Account account : involvedAccounts) {
             accounts.add(account.getIban().toString());
         }
-        SplitPaymentError error = new SplitPaymentError(timestamp, "Split payment of " + amount + " " +  currency,
+        String stringAmount = String.format("%.2f", amount);
+        SplitPaymentError error = new SplitPaymentError(timestamp, "Split payment of " + stringAmount + " " +  currency,
                                                         amount, currency, accounts, null, type,
-                                                        Arrays.stream(amounts).toList(), "One user rejected the paymenyt");
-        for (int i = 0; i < accepted; i++) {
+                                                        Arrays.stream(amounts).toList(), "One user rejected the payment.");
+
+        notify(error);
+        for (int i = 0; i < involvedAccounts.length; i++) {
             ArrayList<SplitCustom> requests = involvedAccounts[i].getUser().getRequests();
             requests.removeIf(request -> request.getAccepted() == -1);
         }

@@ -8,6 +8,8 @@ import org.poo.transactions.Transaction;
 import org.poo.transactions.UpgradedPlan;
 import org.poo.utils.Utils;
 
+import java.util.Locale;
+
 
 public class UpgradePlan implements Command {
 
@@ -50,6 +52,11 @@ public class UpgradePlan implements Command {
             account.getUser().getTransactions().add(error);
         } else if (ret == Utils.ERROR_UPGRADE_PLAN.DOWNGRADE) {
             System.out.println("UNUL MAI BUN DEJA");
+        } else if (ret == Utils.ERROR_UPGRADE_PLAN.SAME_PLAN) {
+            Transaction error = new Transaction(timestamp, "The user already has the " +
+                    account.getUser().getPlanType().toString().toLowerCase() + " plan.");
+            account.getTransactions().add(error);
+            account.getUser().getTransactions().add(error);
         }
 
     }

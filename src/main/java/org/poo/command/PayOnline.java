@@ -138,9 +138,7 @@ public class PayOnline implements Command {
         card.getAccount().addFunds(cashbackAmount * card.getAccount().getCashBack(commerciant));
 
 
-        if (card.getAccount().getType().toString().equals("business")) {
-            System.out.println("-----DA-------");
-        }
+
         card.getAccount().addSpendingTransaction(user, -cashbackAmount, commerciant, timestamp);
 
         if (amountInRon >= 300 && card.getAccount().getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {

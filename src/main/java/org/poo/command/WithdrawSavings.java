@@ -8,6 +8,7 @@ import org.poo.account.User;
 import org.poo.errors.Log;
 import org.poo.system.Converter;
 import org.poo.transactions.Transaction;
+import org.poo.transactions.WithdrawOfSavings;
 import org.poo.utils.Utils;
 import java.text.ParseException;
 
@@ -68,6 +69,14 @@ public class WithdrawSavings implements Command {
 
         savingsAccount.addFunds(-amount);
         account.addFunds(new_amount);
+        WithdrawOfSavings success = new WithdrawOfSavings(amount, timestamp,
+                account.getIban().toString(), savingsAccount.getIban().toString());
+        savingsAccount.getTransactions().add(success);
+        savingsAccount.getUser().getTransactions().add(success);
+
+        account.getTransactions().add(success);
+        account.getUser().getTransactions().add(success);
+
 
     }
 }

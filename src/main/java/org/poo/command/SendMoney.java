@@ -124,7 +124,11 @@ public class SendMoney implements Command {
 
         senderAccount.addSpendingTransaction(user, -amount, comm, timestamp);
         if (comm != null) {
+            senderAccount.addNewSpending(comm, amount);
             comm.setCashBack(senderAccount);
+            if (comm.getName().equals("Microsoft")) {
+                System.out.println(senderAccount.getCashBack(comm));
+            }
             senderAccount.addFunds(amount * senderAccount.getCashBack(comm));
         }
 

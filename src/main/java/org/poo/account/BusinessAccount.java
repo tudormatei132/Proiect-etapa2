@@ -228,7 +228,7 @@ public class BusinessAccount extends Account {
         output.put("currency", getCurrency().toString());
         output.put("spending limit", getSpendingLimit());
         output.put("deposit limit", getDepositLimit());
-
+        output.put("statistics type", "commerciant");
         ArrayNode commerciants = mapper.createArrayNode();
         ArrayList<CommerciantTotal> totalToCommerciants = getCommerciants(timedCommerciants);
 
