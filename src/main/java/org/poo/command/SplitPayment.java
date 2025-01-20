@@ -2,6 +2,7 @@ package org.poo.command;
 
 import org.poo.account.Account;
 import org.poo.system.Converter;
+import org.poo.system.SplitCustom;
 import org.poo.transactions.SplitPay;
 import org.poo.transactions.SplitPaymentError;
 
@@ -17,16 +18,19 @@ public class SplitPayment implements Command {
     private double amount;
     private HashMap<String, Account> accountMap;
     private Converter converter;
-
+    private String type;
+    private List<Double> amounts;
     public SplitPayment(final List<String> accounts, final int timestamp, final String currency,
                         final double amount, final HashMap<String, Account> accountMap,
-                        final Converter converter) {
+                        final Converter converter, final String type, final List<Double> amounts) {
         this.accounts = accounts;
         this.timestamp = timestamp;
         this.currency = currency;
         this.amount = amount;
         this.accountMap = accountMap;
         this.converter = converter;
+        this.type = type;
+        this.amounts = amounts;
     }
 
     /**
@@ -44,30 +48,12 @@ public class SplitPayment implements Command {
                 return;
             }
         }
-        int len = accountArray.size();
-        String description = String.format("Split payment of %.2f %s", amount, currency);
-        for (Account acc : accountArray.reversed()) {
-            double convertedAmount = amount
-                                     * converter.convert(currency, acc.getCurrency().toString());
 
-            if (convertedAmount / len > (acc.getBalance() - acc.getMinBalance())) {
-                SplitPaymentError error = new SplitPaymentError(timestamp, description, amount
-                        / len, currency, accounts, acc.getIban().toString());
-                for (Account it : accountArray) {
-                    it.getTransactions().add(error);
-                    it.getUser().getTransactions().add(error);
-                }
-                return;
-            }
-        }
+        SplitCustom payment = new SplitCustom(accountArray, type, currency, amount,
+                                             timestamp, (ArrayList<Double>) amounts);
 
-        SplitPay split = new SplitPay(timestamp, description, currency, accounts, amount / len);
         for (Account acc : accountArray) {
-            double convertedAmount = amount / len
-                    * converter.convert(currency, acc.getCurrency().toString());
-            acc.addFunds(-convertedAmount);
-            acc.getTransactions().add(split);
-            acc.getUser().getTransactions().add(split);
+            acc.getUser().getRequests().add(payment);
         }
 
     }

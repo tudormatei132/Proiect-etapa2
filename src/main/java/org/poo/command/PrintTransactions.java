@@ -7,6 +7,9 @@ import org.poo.account.User;
 import org.poo.errors.Log;
 import org.poo.transactions.Transaction;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class PrintTransactions implements Command {
 
     private User user;
@@ -37,6 +40,9 @@ public class PrintTransactions implements Command {
         node.put("command", "printTransactions");
 
         ArrayNode transactions = mapper.createArrayNode();
+
+        Collections.sort(user.getTransactions());
+
         for (Transaction transaction : user.getTransactions()) {
             transactions.add(transaction.print(mapper));
         }

@@ -8,6 +8,7 @@ import org.poo.errors.Log;
 import org.poo.system.Converter;
 import org.poo.transactions.Transaction;
 import org.poo.transactions.Transfer;
+import org.poo.utils.AutoUpgrader;
 import org.poo.utils.Utils;
 
 import java.util.HashMap;
@@ -102,6 +103,14 @@ public class SendMoney implements Command {
 
         receiverAccount.getTransactions().add(receivedMoney);
         receiverAccount.getUser().getTransactions().add(receivedMoney);
+
+
+        double amountInRon = amount * Converter.getInstance().
+                                    convert(senderAccount.getCurrency().toString(), "RON");
+        if (amountInRon >= 300 && senderAccount.getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
+            AutoUpgrader.getInstance().updateStatus(senderAccount);
+        }
+
 
     }
 }

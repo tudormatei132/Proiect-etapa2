@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Getter;
 import lombok.Setter;
 import org.poo.fileio.UserInput;
+import org.poo.system.SplitCustom;
 import org.poo.transactions.Transaction;
 
 import java.text.ParseException;
@@ -32,6 +33,8 @@ public class User {
     private String birthDate;
     private String occupation;
     private PLAN_TYPE planType;
+    private ArrayList<SplitCustom> requests;
+
 
     public User(final UserInput input) {
         firstName = new StringBuilder(input.getFirstName());
@@ -47,7 +50,7 @@ public class User {
         } else {
             planType = PLAN_TYPE.STANDARD;
         }
-
+        requests = new ArrayList<>();
     }
 
     /**

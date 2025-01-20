@@ -11,6 +11,7 @@ import org.poo.transactions.CardCreation;
 import org.poo.transactions.CardDestruction;
 import org.poo.transactions.Payment;
 import org.poo.transactions.Transaction;
+import org.poo.utils.AutoUpgrader;
 import org.poo.utils.Utils;
 
 import java.util.HashMap;
@@ -133,6 +134,10 @@ public class PayOnline implements Command {
         commerciant.setCashBack(card.getAccount());
         card.getAccount().addFunds(cashbackAmount * card.getAccount().getCashBack(commerciant));
 
+
+        if (amountInRon >= 300 && card.getAccount().getUser().getPlanType() == Utils.PLAN_TYPE.SILVER) {
+            AutoUpgrader.getInstance().updateStatus(card.getAccount());
+        }
     }
 
 }

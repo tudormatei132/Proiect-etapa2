@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class Transaction {
+public class Transaction implements Comparable<Transaction> {
 
     private int timestamp;
     private String description;
@@ -27,6 +27,10 @@ public class Transaction {
         result.put("timestamp", timestamp);
         result.put("description", description);
         return result;
+    }
+
+    public int compareTo(final Transaction o) {
+        return timestamp - o.timestamp;
     }
 
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.poo.commerciant.Commerciant;
 import org.poo.system.Converter;
+import org.poo.system.SplitCustom;
 import org.poo.transactions.Payment;
 import org.poo.transactions.Transaction;
 import org.poo.utils.Utils;
@@ -48,6 +49,7 @@ public class Account {
         totalSpendings = 0;
         transactionsCount = 0;
         permanentDiscount = 0f;
+
     }
 
     /**
@@ -238,5 +240,16 @@ public class Account {
         return ERROR_UPGRADE_PLAN.DOWNGRADE;
 
     }
+
+    /**
+     * used to implement observer
+     * updates the list of transactions
+     * @param transaction the split payment
+     */
+    public void update(Transaction transaction) {
+        transactions.add(transaction);
+        getUser().getTransactions().add(transaction);
+    }
+
 
 }

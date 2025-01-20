@@ -108,7 +108,8 @@ public class CommandHandler {
             case "splitPayment":
                 return new SplitPayment(command.getAccounts(), command.getTimestamp(),
                         command.getCurrency(), command.getAmount(), system.getAccountMap(),
-                        system.getConverter());
+                        system.getConverter(), command.getSplitPaymentType(),
+                        command.getAmountForUsers());
 
 
             case "report":
@@ -145,6 +146,10 @@ public class CommandHandler {
             case "cashWithdrawal":
                 return new CashWithdrawal(system.getCardMap().get(command.getCardNumber()),
                         command, system.getUserMap().get(command.getEmail()), mapper, output);
+
+            case "acceptSplitPayment":
+                return new AcceptSplit(system.getUserMap().get(command.getEmail()),
+                        command.getTimestamp(), command.getSplitPaymentType());
 
             default:
                 return null;
